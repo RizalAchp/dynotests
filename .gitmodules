@@ -1,0 +1,20 @@
+[submodule "dyno_core"]
+	path = dyno_core
+	url = git@github.com:RizalAchp/dyno_core.git
+	branch = dev
+[submodule "dyno_app"]
+	path = dyno_app
+	url = git@github.com:RizalAchp/dyno_app.git
+	branch = dev
+[submodule "dyno_web_backend"]
+	path = dyno_web_backend
+	url = git@github.com:RizalAchp/dyno_web_backend.git
+	branch = master
+[submodule "dyno_web_frontend"]
+	path = dyno_web_frontend
+	url = git@github.com:RizalAchp/dyno_web_frontend.git
+	branch = master
+[submodule "dyno_stm32"]
+	path = dyno_stm32
+	url = git@github.com:RizalAchp/dyno_stm32.git
+	branch = master
