@@ -1,10 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
-    "./dyno_web_backend",
-    "./dyno_web_frontend",
-    "./dyno_core",
-    "./dyno_app"
+    # "dyno_web_backend",
+    # "dyno_web_frontend",
+    "dyno_core",
+    # "dyno_app"
 ] 
 
 [workspace.dependencies]
