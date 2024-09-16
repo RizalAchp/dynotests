@@ -7,6 +7,17 @@ members = [
     # "dyno_app"
 ] 
 
+[workspace.package]
+version = "0.1.0"
+authors = ["Rizal Achmad Pahlevi <rizal.ahmadp@gmail.com>"]
+repository = "https://github.com/dynotestpolije/dyno_core"
+homepage = "https://github.com/dynotestpolije/dyno_core"
+description = "Dynotests Project application"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["network", "graphics", "embeded", "gui", "client", "math", "server"]
+edition = "2021"
+
 [workspace.dependencies]
 futures = { version = "0.3.28" }
 serde = { version = "1.0", features = ["derive"] }

@@ -1,0 +1,9 @@
+target
+Cargo.lock
+
+dist
+
+static/tailwind.css
+**/node_modules
+**/public
+**/package-lock.json
