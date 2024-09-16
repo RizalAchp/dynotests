@@ -1,7 +1,10 @@
+use derive_more::Display;
+use serde::{Deserialize, Serialize};
+
 #[derive(
-    serde::Deserialize,
-    serde::Serialize,
-    derive_more::Display,
+    Deserialize,
+    Serialize,
+    Display,
     Debug,
     Default,
     Clone,
@@ -14,12 +17,12 @@
 )]
 #[serde(rename_all = "lowercase")]
 pub enum Roles {
-    #[display(fmt = "admin")]
+    #[display("admin")]
     Admin,
-    #[display(fmt = "user")]
+    #[display("user")]
     User,
     #[default]
-    #[display(fmt = "guest")]
+    #[display("guest")]
     Guest,
 }
 
@@ -36,6 +39,15 @@ impl Roles {
     pub const fn is_guest(self) -> bool {
         matches!(self, Self::Admin)
     }
+
+    #[inline]
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Roles::Admin => "admin",
+            Roles::User => "user",
+            Roles::Guest => "guest",
+        }
+    }
 }
 
 impl<S: AsRef<str>> From<S> for Roles {
@@ -49,18 +61,7 @@ impl<S: AsRef<str>> From<S> for Roles {
     }
 }
 
-impl crate::AsStr<'static> for Roles {
-    #[inline]
-    fn as_str(&self) -> &'static str {
-        match self {
-            Roles::Admin => "admin",
-            Roles::User => "user",
-            Roles::Guest => "guest",
-        }
-    }
-}
-
-impl std::str::FromStr for Roles {
+impl core::str::FromStr for Roles {
     type Err = String;
     #[inline]
     fn from_str(s: &str) -> Result<Self, Self::Err> {

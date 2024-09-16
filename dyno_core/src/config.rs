@@ -1,122 +1,130 @@
-use crate::{
-    convertions::{length, weight},
-    data_structure::filter::DataFilter,
-    MotorInfo, MotorType, Numeric,
+#[cfg(feature = "std")]
+use derive_more::Display;
+#[cfg(feature = "derive_serde")]
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "std")]
+use uom::si::{
+    acceleration::meter_per_second_squared,
+    f64::*,
+    force::newton,
+    length::{centimeter, meter},
+    mass::kilogram,
+    time::millisecond,
 };
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
+use crate::types::{MotorInfo, MotorKind, Stroke, GRAVITY_SPEED, PI};
+
+#[cfg_attr(feature = "derive_serde", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "derive_serde", serde(default))]
+#[cfg_attr(feature = "std", derive(Display))]
+#[cfg_attr(feature = "std", display("{self:#?}"))]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct DynoConfig {
-    #[serde(default = "default_mqtt_user")]
-    pub mqtt_user: String,
-    #[serde(default = "default_mqtt_pswd")]
-    pub mqtt_pswd: String,
+    pub diameter_roller_cm: f64,
+    pub diameter_roller_beban_cm: f64,
+    pub diameter_gear_encoder_cm: f64,
+    pub diameter_gear_beban_cm: f64,
+    pub berat_beban_kg: f64,
 
-    #[serde(default)]
     pub motor_info: MotorInfo,
-    #[serde(default)]
-    pub motor_type: MotorType,
-
-    #[serde(default = "default_diameter_roller")]
-    pub diameter_roller: length::Metres,
-
-    #[serde(default = "default_diameter_roller_beban")]
-    pub diameter_roller_beban: length::Metres,
-
-    #[serde(default = "default_diameter_gear_encoder")]
-    pub diameter_gear_encoder: length::Metres,
-
-    #[serde(default = "default_diameter_gear_beban")]
-    pub diameter_gear_beban: length::Metres,
-
-    #[serde(default = "default_jarak_gear")]
-    pub jarak_gear: length::Metres,
-
-    #[serde(default = "default_berat_beban")]
-    pub berat_beban: weight::KiloGram,
-
-    #[serde(default = "default_gaya_beban")]
-    pub gaya_beban: crate::Float,
-
-    #[serde(default = "default_keliling_roller")]
-    pub keliling_roller: length::Metres,
-
-    #[serde(default)]
-    pub filter: DataFilter,
+    pub max_encoder_pulse: u16,
+    pub delta_ms: u16,
 }
 
 impl Default for DynoConfig {
     fn default() -> Self {
         Self {
-            mqtt_user: default_mqtt_user(),
-            mqtt_pswd: default_mqtt_pswd(),
-            diameter_roller: default_diameter_roller(),
-            diameter_roller_beban: default_diameter_roller_beban(),
-            berat_beban: default_berat_beban(),
-            diameter_gear_encoder: default_diameter_gear_encoder(),
-            diameter_gear_beban: default_diameter_gear_beban(),
-            jarak_gear: default_jarak_gear(),
-            gaya_beban: default_gaya_beban(),
-            keliling_roller: default_keliling_roller(),
-            motor_type: MotorType::default(),
+            diameter_roller_cm: 14.22,
+            diameter_roller_beban_cm: 19.33,
+            berat_beban_kg: 18.5,
+            diameter_gear_encoder_cm: 10.,
+            diameter_gear_beban_cm: 5.4,
+            max_encoder_pulse: 300,
+            delta_ms: 200,
             motor_info: MotorInfo::default(),
-            filter: DataFilter::default(),
         }
     }
 }
 
 impl DynoConfig {
-    pub fn init(&mut self) {
-        self.filter.reset();
-        self.gaya_beban = self.berat_beban.value() * crate::GRAVITY_SPEED;
-        self.keliling_roller = self.diameter_roller * crate::PI;
+    #[inline(always)]
+    pub fn perbandingan_gear_encoder(&self) -> f64 {
+        self.diameter_gear_encoder_cm / self.diameter_gear_beban_cm
     }
     #[inline(always)]
-    pub fn perbandingan_gear(&self) -> crate::Float {
-        (self.diameter_gear_beban / self.diameter_roller).to_float()
+    pub fn perbandingan_gear_beban(&self) -> f64 {
+        self.diameter_gear_beban_cm / self.diameter_gear_encoder_cm
+    }
+}
+
+#[cfg(feature = "std")]
+impl DynoConfig {
+    #[inline(always)]
+    pub fn radius_roller<UnitLength>(&self) -> f64
+    where
+        UnitLength: uom::si::length::Unit + uom::Conversion<f64, T = f64>,
+    {
+        let radius_cm = Length::new::<centimeter>(self.diameter_roller_cm) * 0.5;
+        radius_cm.get::<UnitLength>()
+    }
+    #[inline(always)]
+    pub fn radius_roller_beban<UnitLength>(&self) -> f64
+    where
+        UnitLength: uom::si::length::Unit + uom::Conversion<f64, T = f64>,
+    {
+        let radius_cm = Length::new::<centimeter>(self.diameter_roller_beban_cm) * 0.5;
+        radius_cm.get::<UnitLength>()
     }
 
     #[inline(always)]
-    pub fn inertia_roller_beban(&self) -> crate::Float {
-        0.5 * self.berat_beban.to_float() * self.diameter_roller_beban.to_float().powi(2)
+    pub fn circumference_roller<UnitLength>(&self) -> f64
+    where
+        UnitLength: uom::si::length::Unit + uom::Conversion<f64, T = f64>,
+    {
+        let circumference_cm = Length::new::<centimeter>(self.diameter_roller_cm * PI);
+        circumference_cm.get::<UnitLength>()
     }
-}
-#[inline(always)]
-fn default_diameter_roller() -> length::Metres {
-    length::Metres(0.1422) // 14.22 cm
-}
-#[inline(always)]
-fn default_diameter_roller_beban() -> length::Metres {
-    length::Metres(0.1933) //  19.33 cm
-}
-#[inline(always)]
-fn default_diameter_gear_encoder() -> length::Metres {
-    length::Metres(0.1)
-}
-#[inline(always)]
-fn default_diameter_gear_beban() -> length::Metres {
-    length::Metres(0.054)
-}
-#[inline(always)]
-fn default_jarak_gear() -> length::Metres {
-    length::Metres(0.144)
-}
-#[inline(always)]
-fn default_berat_beban() -> weight::KiloGram {
-    weight::KiloGram(18.5)
-}
-#[inline(always)]
-fn default_gaya_beban() -> crate::Float {
-    default_berat_beban().value() * crate::GRAVITY_SPEED
-}
-#[inline(always)]
-fn default_keliling_roller() -> length::Metres {
-    default_diameter_roller() * crate::PI
-}
-#[inline(always)]
-fn default_mqtt_user() -> String {
-    "E32201406_RIZAL".to_owned()
-}
-#[inline(always)]
-fn default_mqtt_pswd() -> String {
-    "E32201406_RIZAL".to_owned()
+
+    #[inline(always)]
+    pub fn circumference_roller_beban<UnitLength>(&self) -> f64
+    where
+        UnitLength: uom::si::length::Unit + uom::Conversion<f64, T = f64>,
+    {
+        let circumference_cm = Length::new::<centimeter>(self.diameter_roller_beban_cm * PI);
+        circumference_cm.get::<UnitLength>()
+    }
+
+    #[inline(always)]
+    pub fn rpm_factor(&self) -> f64 {
+        if matches!(self.motor_info.kind, MotorKind::Electric) {
+            return 1.;
+        }
+        match self.motor_info.stroke {
+            Stroke::Four => 2. / ((self.motor_info.cylinder as u8) as f64),
+            Stroke::Two => 1.,
+        }
+    }
+
+    #[inline(always)]
+    pub fn inertia_roller_beban(&self) -> f64 {
+        let r = (self.diameter_roller_beban_cm * 0.5) / 100.;
+        self.berat_beban_kg * r * r
+    }
+
+    #[inline(always)]
+    pub fn force_roller_beban(&self) -> Force {
+        let percepatan_gravitasi = Acceleration::new::<meter_per_second_squared>(GRAVITY_SPEED);
+        Mass::new::<kilogram>(self.berat_beban_kg) * percepatan_gravitasi
+    }
+
+    #[inline(always)]
+    pub fn torsi_roller_beban(&self) -> f64 {
+        let f = self.force_roller_beban().get::<newton>();
+        let r = self.radius_roller_beban::<meter>();
+        f * r
+    }
+
+    pub fn delta_time(&self) -> Time {
+        Time::new::<millisecond>(self.delta_ms as f64)
+    }
 }

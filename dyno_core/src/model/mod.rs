@@ -1,29 +1,31 @@
 use chrono::{DateTime, Utc};
 
-use crate::DynoConfig;
+use crate::config::DynoConfig;
 
 pub mod dynotests;
 pub mod role;
 pub mod users;
 
-crate::decl_constants!(
-    pub COOKIE_NAME                 => "dyno_session",
-    pub USER_HEADER_NAME            => "x-user-id",
-    pub DECRYPT_MASTER_KEY_URL      => "/auth/decrypt",
-    pub APP_USER_AGENT              => "dynotests/desktop-app"
-);
+pub const COOKIE_NAME: &str = "dyno_session";
+pub const USER_HEADER_NAME: &str = "x-user-id";
+pub const APP_USER_AGENT: &str = "dynotests/desktop-app";
 
-#[derive(serde::Deserialize, serde::Serialize, derive_more::Display)]
-#[display(fmt = "UserSession {{ id:{id}, role:{role} }}")]
-#[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg(feature = "std")]
+use derive_more::Display;
+#[cfg(feature = "derive_serde")]
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize, Display)]
+#[display("{self:#?}")]
+#[derive(Debug, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct UserSession {
     pub id: i64,
-    pub uuid: uuid::Uuid,
+    pub uuid: String,
     pub role: role::Roles,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, derive_more::Display)]
-#[display(fmt = "session {{ sub:{sub} iat:{iat}, exp:{exp} }}")]
+#[derive(Deserialize, Serialize, Display)]
+#[display("{self:#?}")]
 #[derive(Debug, Clone)]
 pub struct TokenClaims {
     pub sub: String,
@@ -50,33 +52,31 @@ impl TokenClaims {
     }
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct ActiveResponse {
     pub user: Option<users::UserResponse>,
     pub dyno: Option<DynoConfig>,
     pub start: DateTime<Utc>,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, derive_more::Display)]
+#[derive(Deserialize, Serialize, Display)]
 #[serde(rename_all = "lowercase")]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ResponseStatus {
-    #[display(fmt = "success")]
+    #[display("success")]
     Success,
-
-    #[display(fmt = "error")]
+    #[display("error")]
     Error,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct HistoryResponse {
     pub id: i64,
     pub user_id: i64,
-    pub created_at: chrono::NaiveDateTime,
+    pub created_at: DateTime<Utc>,
 }
 
-#[cfg_attr(debug_assert, derive(Debug))]
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
 pub struct ApiResponse<T> {
     pub payload: T,
     pub status: ResponseStatus,

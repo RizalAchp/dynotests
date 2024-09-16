@@ -1,12 +1,13 @@
 use super::role::Roles;
-use crate::{DynoErr, DynoResult};
 use chrono::NaiveDateTime;
+use derive_more::Display;
+use serde::{Deserialize, Serialize};
 
-#[derive(serde::Deserialize, serde::Serialize, derive_more::Display, Debug, Clone, PartialEq)]
-#[display(fmt = "UserResponse {{ nim:{nim}, name:{name}, email:{email:?}, role:{role} }}")]
+#[derive(Deserialize, Serialize, Display, Debug, Clone, PartialEq)]
+#[display("{self:#?}")]
 pub struct UserResponse {
     pub id: i64,
-    pub uuid: uuid::Uuid,
+    pub uuid: String,
     pub nim: String,
     pub name: String,
     pub email: Option<String>,
@@ -16,16 +17,14 @@ pub struct UserResponse {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub enum OneOrMany<T> {
     One(T),
     Many(Vec<T>),
 }
 
-#[derive(
-    serde::Deserialize, serde::Serialize, derive_more::Display, Debug, Default, Clone, PartialEq,
-)]
-#[display(fmt = "UserRegistration {{ nim:{nim}, email:{email:?} }}")]
+#[derive(Deserialize, Serialize, Display, Debug, Default, Clone, PartialEq)]
+#[display("{self:#?}")]
 pub struct UserRegistration {
     pub nim: String,
     pub email: String,
@@ -34,35 +33,15 @@ pub struct UserRegistration {
     pub role: Roles,
 }
 
-impl crate::Validate for UserRegistration {
-    fn validate(&self) -> DynoResult<()> {
-        crate::validate_nim(&self.nim)?;
-        crate::validate_email(&self.email)?;
-        crate::validate_password(&self.password)?;
-        if self.confirm_password != self.password {
-            return Err(DynoErr::validation_error(
-                "Invalid confirm_password: second password is not matching with the password",
-            ));
-        }
-        Ok(())
-    }
-}
-
-#[derive(serde::Deserialize, serde::Serialize, derive_more::Display, Debug, Default, Clone)]
-#[display(fmt = "UserLogin {{ nim:{nim}, password:{password} }}")]
+#[derive(Deserialize, Serialize, Display, Debug, Default, Clone)]
+#[display("{self:#?}")]
 pub struct UserLogin {
     pub nim: String,
     pub password: String,
 }
-impl crate::Validate for UserLogin {
-    fn validate(&self) -> DynoResult<()> {
-        crate::validate_nim(&self.nim)?;
-        crate::validate_password(&self.password)
-    }
-}
 
-#[derive(serde::Deserialize, serde::Serialize, derive_more::Display, Debug, Default, Clone)]
-#[display(fmt = "UserUpdate {{ nim:{nim:?}, name:{name:?}, email:{email:?}, role:{role:?} }}")]
+#[derive(Deserialize, Serialize, Display, Debug, Default, Clone)]
+#[display("{self:#?}")]
 pub struct UserUpdate {
     pub nim: Option<String>,
     pub name: Option<String>,
