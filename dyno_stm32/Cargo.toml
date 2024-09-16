@@ -1,0 +1,21 @@
+[package]
+name = "dyno_stm32"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description.workspace = true
+license.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+edition.workspace = true
+
+[dependencies]
+
+[dependencies.dyno_core]
+# git = "https://github.com/dynotestpolije/dyno_core.git"
+# branch = "dev" 
+default-features = false
+workspace = true
+features = ["derive_serde"]
+
