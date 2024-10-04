@@ -184,7 +184,6 @@ mod tests {
     use std::sync::OnceLock;
 
     use uom::si::f64::*;
-    use uom::si::torque::pound_force_foot;
     use uom::si::{
         angular_velocity::revolution_per_minute, power::horsepower_metric,
         temperature_interval::degree_celsius, torque::newton_meter, velocity::kilometer_per_hour,
@@ -195,9 +194,9 @@ mod tests {
     const SIZE_TESTED: usize = 5;
 
     const SER_DATA: RawSerialData = RawSerialData {
-        pulse_enc: 1,
+        pulse_enc: 10,
         pulse_rpm: 20,
-        temperature: 420,
+        raw_temp: 420,
     };
 
     fn data_buffer() -> &'static DynotestData {
@@ -222,27 +221,27 @@ mod tests {
         } = data;
         assert_eq!(
             speed.get::<kilometer_per_hour>().floor(),
-            expect.speed.get::<kilometer_per_hour>(),
+            expect.speed.get::<kilometer_per_hour>().round(),
             "data speed asserts"
         );
         assert_eq!(
-            torque.get::<pound_force_foot>().floor(),
-            expect.torque.get::<pound_force_foot>(),
+            torque.get::<newton_meter>().floor(),
+            expect.torque.get::<newton_meter>().round(),
             "data torque asserts"
         );
         assert_eq!(
             horsepower.get::<horsepower_metric>().floor(),
-            expect.horsepower.get::<horsepower_metric>(),
+            expect.horsepower.get::<horsepower_metric>().round(),
             "data horsepower asserts"
         );
         assert_eq!(
             rpm_roda.get::<revolution_per_minute>().floor(),
-            expect.rpm_roda.get::<revolution_per_minute>(),
+            expect.rpm_roda.get::<revolution_per_minute>().round(),
             "data rpm roda asserts"
         );
         assert_eq!(
             rpm_engine.get::<revolution_per_minute>().floor(),
-            expect.rpm_engine.get::<revolution_per_minute>(),
+            expect.rpm_engine.get::<revolution_per_minute>().round(),
             "data rpm engine asserts"
         );
     }
@@ -263,6 +262,6 @@ mod tests {
     fn test_data_buffer() {
         let buffer = data_buffer();
         assert_eq!(buffer.len(), SIZE_TESTED);
-        assert_data(buffer[0], data(8., 150., 9561., 4500., 0.));
+        assert_data(buffer[0], data(64.0, 93., 0., 2400., 9600.));
     }
 }

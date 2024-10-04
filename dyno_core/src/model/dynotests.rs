@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 use crate::config::DynoConfig;
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, PartialEq, Clone, Deserialize, Serialize)]
@@ -17,10 +19,10 @@ pub struct DynoTest {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
-pub struct DynoTestDataInfo {
-    pub checksum_hex: String,
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DynoTestDataInfo<'s> {
+    pub checksum_hex: Cow<'s, str>,
     pub config: DynoConfig,
-    pub start: NaiveDateTime,
-    pub stop: NaiveDateTime,
+    pub start: DateTime<Utc>,
+    pub stop: DateTime<Utc>,
 }

@@ -3,9 +3,6 @@ use derive_more::Display;
 #[cfg(feature = "derive_serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(feature = "std"))]
-use core::prelude::rust_2021::derive;
-
 #[cfg_attr(feature = "derive_serde", derive(Deserialize, Serialize))]
 #[cfg_attr(
     feature = "std",
@@ -25,20 +22,24 @@ pub struct SerialDataInit {
 pub struct RawSerialData {
     pub pulse_rpm: u16,
     pub pulse_enc: u16,
-    pub temperature: u32,
+    pub raw_temp: u16,
 }
 impl RawSerialData {
+    pub const BYTE_SIZE: usize = 8;
     pub const fn new() -> Self {
         Self {
             pulse_rpm: 0,
             pulse_enc: 0,
-            temperature: 0,
+            raw_temp: 0,
         }
     }
-}
-impl Default for RawSerialData {
-    fn default() -> Self {
-        Self::new()
+
+    #[cfg(feature = "std")]
+    pub fn temp_celcius(&self) -> Option<f64> {
+        if (self.raw_temp & 0x4) != 0 {
+            return None;
+        }
+        Some(((self.raw_temp >> 4) as f64) * 0.25_f64)
     }
 }
 
@@ -49,6 +50,11 @@ impl SerialDataInit {
     }
 }
 
+impl core::default::Default for RawSerialData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl core::default::Default for SerialDataInit {
     fn default() -> Self {
         Self { period_ms: 250 }

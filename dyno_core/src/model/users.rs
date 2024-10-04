@@ -1,20 +1,22 @@
+use std::borrow::Cow;
+
 use super::role::Roles;
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Display, Debug, Clone, PartialEq)]
 #[display("{self:#?}")]
-pub struct UserResponse {
+pub struct UserResponse<'s> {
     pub id: i64,
-    pub uuid: String,
-    pub nim: String,
-    pub name: String,
-    pub email: Option<String>,
-    pub photo: Option<String>,
+    pub uuid: Cow<'s, str>,
+    pub nim: Cow<'s, str>,
+    pub name: Cow<'s, str>,
+    pub email: Option<Cow<'s, str>>,
+    pub photo: Option<Cow<'s, str>>,
     pub role: Roles,
-    pub updated_at: NaiveDateTime,
-    pub created_at: NaiveDateTime,
+    pub updated_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

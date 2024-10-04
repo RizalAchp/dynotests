@@ -85,10 +85,10 @@ impl DynotestData {
     #[inline(always)]
     pub fn push_from_raw_serial_data(
         &mut self,
-        RawSerialData {
+        raw @ RawSerialData {
             pulse_rpm,
             pulse_enc,
-            temperature,
+            ..
         }: RawSerialData,
     ) {
         let last_data = self.last();
@@ -130,7 +130,9 @@ impl DynotestData {
 
         let odo = self.config.circumference_roller::<kilometer>() * roller_revolution;
         let speed = Velocity::new::<kilometer_per_hour>(odo / delta_time.get::<hour>());
-        let temp = TemperatureInterval::new::<degree_celsius>(temperature as f64);
+        let temp = TemperatureInterval::new::<degree_celsius>(
+            raw.temp_celcius().unwrap_or_else(|| self.last().temp.value),
+        );
 
         self.odo_km += odo;
         self.data.push(Data {

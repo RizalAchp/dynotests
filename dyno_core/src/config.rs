@@ -40,7 +40,7 @@ impl Default for DynoConfig {
             diameter_gear_encoder_cm: 10.,
             diameter_gear_beban_cm: 5.4,
             max_encoder_pulse: 300,
-            delta_ms: 200,
+            delta_ms: 250,
             motor_info: MotorInfo::default(),
         }
     }

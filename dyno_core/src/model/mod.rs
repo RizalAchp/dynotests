@@ -53,8 +53,8 @@ impl TokenClaims {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
-pub struct ActiveResponse {
-    pub user: Option<users::UserResponse>,
+pub struct ActiveResponse<'s> {
+    pub user: Option<users::UserResponse<'s>>,
     pub dyno: Option<DynoConfig>,
     pub start: DateTime<Utc>,
 }
