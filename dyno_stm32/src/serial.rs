@@ -28,8 +28,8 @@ impl Serial {
         cts: UsartCts,
         tx_dma: UsartTxDma,
         rx_dma: UsartRxDma,
-    ) -> Self {
-        let usart = unwrap!(usart::Uart::new_with_rtscts(
+    ) -> Result<Self, usart::ConfigError> {
+        let usart = usart::Uart::new_with_rtscts(
             peri,
             rx,
             tx,
@@ -39,11 +39,11 @@ impl Serial {
             tx_dma,
             rx_dma,
             Self::config(),
-        ));
-        Self {
+        )?;
+        Ok(Self {
             usart,
             buffer: [0u8; BUF_SIZE],
-        }
+        })
     }
 
     #[inline]

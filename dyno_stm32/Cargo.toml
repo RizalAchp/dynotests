@@ -9,39 +9,27 @@ license-file.workspace = true
 keywords.workspace = true
 edition.workspace = true
 
-[features]
-default = ["defmt"]
-defmt = [
-    "dep:defmt",
-    "dep:defmt-rtt",
-    "dep:panic-probe",
-    "embassy-executor/defmt",
-    "embassy-time/defmt",
-    "embassy-stm32/defmt",
-    "postcard/use-defmt",
-]
-
 [dependencies]
 cortex-m         = { version = "0.7.6", features = ["critical-section-single-core"] }
 cortex-m-rt      = { version = "0.7.1" }
 
-defmt            = { optional = true, version = "0.3.5" }
-defmt-rtt        = { optional = true, version = "0.4.0" }
-panic-probe      = { optional = true, version = "0.3.2", features = ["print-defmt"] }
+defmt            = { version = "0.3.5" }
+defmt-rtt        = { version = "0.4.0" }
+panic-probe      = { version = "0.3.2", features = ["print-defmt"] }
 
-postcard = { version = "1.0.10", default-features = false }
+postcard = { version = "1.0.10", default-features = false, features = ["use-defmt"] }
 
 [dependencies.embassy-time]
 version =  "0.3"
-features = ["tick-hz-32_768"]
+features = ["tick-hz-32_768", "defmt-timestamp-uptime", "defmt"]
 
 [dependencies.embassy-executor]
 version = "0.6"
-features = ["task-arena-size-8192", "arch-cortex-m", "executor-interrupt", "executor-thread", "integrated-timers"]
+features = ["task-arena-size-8192", "arch-cortex-m", "executor-interrupt", "executor-thread", "integrated-timers", "defmt"]
 
 [dependencies.embassy-stm32]
 version = "0.1.0"
-features = ["stm32f411ce", "memory-x", "exti", "unstable-pac", "time-driver-any"]
+features = ["stm32f411ce", "memory-x", "exti", "unstable-pac", "time-driver-any", "defmt"]
 
 
 [dependencies.dyno_core]
